@@ -2,7 +2,6 @@ import pandas as pd
 import pymysql
 
 try:
-    # Connect to MySQL
     con = pymysql.connect(
         host="localhost",
         user="root",
@@ -12,7 +11,6 @@ try:
 
     cur = con.cursor()
 
-    # Create table
     cur.execute("""
     CREATE TABLE IF NOT EXISTS employee(
         emp_id INT PRIMARY KEY,
@@ -52,7 +50,7 @@ try:
             print("Error:", e)
 
 
-    def average():
+    def avg():
         try:
             data = pd.read_sql("SELECT salary FROM employee", con)
 
@@ -79,7 +77,7 @@ try:
         except Exception as e:
             print("Error:", e)
 
-    def delete():
+    def del():
         try:
             id = input("Enter Employee ID: ")
 
@@ -113,13 +111,13 @@ try:
             display()
 
         elif choice == "3":
-            average()
+            avg()
 
         elif choice == "4":
             update()
 
         elif choice == "5":
-            delete()
+            del()
 
         elif choice == "6":
             break
