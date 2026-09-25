@@ -5,7 +5,7 @@ try:
     con = pymysql.connect(
         host="localhost",
         user="root",
-        password="Admin@123",
+        password="masa25#ade",
         database="employee"
     )
 
@@ -77,7 +77,7 @@ try:
         except Exception as e:
             print("Error:", e)
 
-    def del():
+    def delete():
         try:
             id = input("Enter Employee ID: ")
 
@@ -117,7 +117,7 @@ try:
             update()
 
         elif choice == "5":
-            del()
+            delete()
 
         elif choice == "6":
             break
