@@ -1,31 +1,56 @@
-import sqlite3
+import pymysql
 
 class Employee:
 
     def __init__(self):
-        self.db = "employee.db"
+        self.db = {
+            "host": "localhost",
+            "user": "root",
+            "password": "masa25#ade",
+            "database": "employee"
+        }
+
+        with pymysql.connect(**self.db) as con:
+            with con.cursor() as cur:
+                cur.execute("""
+                CREATE TABLE IF NOT EXISTS employee(
+                    id INT PRIMARY KEY,
+                    name VARCHAR(100),
+                    department VARCHAR(100),
+                    salary FLOAT,
+                    email VARCHAR(100)
+                )
+                """)
+            con.commit()
 
     def create(self):
         try:
-            with sqlite3.connect(self.db) as con:
-                con.execute(
-                    "INSERT INTO employee VALUES (?, ?, ?, ?, ?)",
-                    (
-                        input("ID: "),
-                        input("Name: "),
-                        input("Department: "),
-                        input("Salary: "),
-                        input("Email: ")
+            with pymysql.connect(**self.db) as con:
+                with con.cursor() as cur:
+                    id = input("Enter ID: ")
+                    name = input("Enter Name: ")
+                    dept = input("Enter Department: ")
+                    salary = input("Enter Salary: ")
+                    email = input("Enter Email: ")
+
+                    cur.execute(
+                        "INSERT INTO employee VALUES(%s,%s,%s,%s,%s)",
+                        (id, name, dept, salary, email)
                     )
-                )
-            print("Employee added")
+
+                con.commit()
+
+            print("Employee added!")
+
         except Exception as e:
             print("Error:", e)
 
     def read(self):
         try:
-            with sqlite3.connect(self.db) as con:
-                rows = con.execute("SELECT * FROM employee").fetchall()
+            with pymysql.connect(**self.db) as con:
+                with con.cursor() as cur:
+                    cur.execute("SELECT * FROM employee")
+                    rows = cur.fetchall()
 
             for row in rows:
                 print(row)
@@ -35,31 +60,37 @@ class Employee:
 
     def update(self):
         try:
-            id = input("Enter ID: ")
-            name = input("Enter new name: ")
+            with pymysql.connect(**self.db) as con:
+                with con.cursor() as cur:
+                    id = input("Enter ID: ")
+                    name = input("Enter New Name: ")
 
-            with sqlite3.connect(self.db) as con:
-                con.execute(
-                    "UPDATE employee SET name=? WHERE id=?",
-                    (name, id)
-                )
+                    cur.execute(
+                        "UPDATE employee SET name=%s WHERE id=%s",
+                        (name, id)
+                    )
 
-            print("Updated")
+                con.commit()
+
+            print("Employee updated!")
 
         except Exception as e:
             print("Error:", e)
 
     def delete(self):
         try:
-            id = input("Enter ID: ")
+            with pymysql.connect(**self.db) as con:
+                with con.cursor() as cur:
+                    id = input("Enter ID: ")
 
-            with sqlite3.connect(self.db) as con:
-                con.execute(
-                    "DELETE FROM employee WHERE id=?",
-                    (id,)
-                )
+                    cur.execute(
+                        "DELETE FROM employee WHERE id=%s",
+                        (id,)
+                    )
 
-            print("Deleted")
+                con.commit()
+
+            print("Employee deleted!")
 
         except Exception as e:
             print("Error:", e)
@@ -68,23 +99,31 @@ class Employee:
 emp = Employee()
 
 while True:
-    print("\n1. Create")
-    print("2. Read")
-    print("3. Update")
-    print("4. Delete")
-    print("5. Exit")
+    print("""
+1. Create Employee
+2. Read Employees
+3. Update Employee
+4. Delete Employee
+5. Exit
+""")
 
     choice = input("Enter choice: ")
 
     if choice == "1":
         emp.create()
+
     elif choice == "2":
         emp.read()
+
     elif choice == "3":
         emp.update()
+
     elif choice == "4":
         emp.delete()
+
     elif choice == "5":
+        print("Goodbye!")
         break
+
     else:
         print("Invalid choice")
