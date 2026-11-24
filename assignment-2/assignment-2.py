@@ -1,31 +1,17 @@
+
 import csv
-import pymysql
 import os
 
 class Employee:
     def __init__(self):
         self.file = "employee.csv"
 
-        con = pymysql.connect(
-            host="localhost",
-            user="root",
-            password="masa25#ade",
-            database="employee"
-        )
-
-        with con:
-            with con.cursor() as cur:
-                cur.execute("SELECT * FROM employee")
-                data = cur.fetchall()
-
-        with open(self.file, "w", newline="") as f:
-            writer = csv.writer(f)
-
-            writer.writerow([
-                "emp_id", "name", "department", "salary", "email"
-            ])
-
-            writer.writerows(data)
+        if not os.path.exists(self.file):
+            with open(self.file, "w", newline="") as f:
+                writer = csv.writer(f)
+                writer.writerow([
+                    "emp_id", "name", "department", "salary", "email"
+                ])
 
     def read(self):
         with open(self.file, "r") as f:
@@ -58,6 +44,7 @@ class Employee:
                 if row[0] == id:
                     row[1] = name
                 rows.append(row)
+
         with open(self.file, "w", newline="") as f:
             writer = csv.writer(f)
             writer.writerows(rows)
@@ -68,9 +55,9 @@ class Employee:
         id = input("Enter Employee ID: ")
 
         rows = []
+
         with open(self.file, "r") as f:
             reader = csv.reader(f)
-
             for row in reader:
                 if row[0] != id:
                     rows.append(row)
@@ -80,6 +67,7 @@ class Employee:
             writer.writerows(rows)
 
         print("Employee deleted!")
+
 
 emp = Employee()
 
