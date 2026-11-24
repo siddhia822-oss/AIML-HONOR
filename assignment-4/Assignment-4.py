@@ -1,134 +1,90 @@
+
 import pandas as pd
 import pymysql
+from sqlalchemy import create_engine
 
-try:
-    con = pymysql.connect(
-        host="localhost",
-        user="root",
-        password="masa25#ade",
-        database="employee"
-    )
+con = pymysql.connect(
+    host="localhost",
+    user="root",
+    password="masa25#ade",
+    database="employee"
+)
 
-    cur = con.cursor()
+engine = create_engine("mysql+pymysql://root:masa25%23ade@localhost/employee")
 
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS employee(
-        emp_id INT PRIMARY KEY,
-        name VARCHAR(100),
-        department VARCHAR(100),
-        salary FLOAT,
-        email VARCHAR(100)
-    )
-    """)
+cur = con.cursor()
+
+cur.execute("""
+CREATE TABLE IF NOT EXISTS employee(
+emp_id INT PRIMARY KEY,
+name VARCHAR(100),
+department VARCHAR(100),
+salary FLOAT,
+email VARCHAR(100))
+""")
+con.commit()
+
+def add():
+    id = int(input("Enter ID: "))
+    name = input("Enter Name: ")
+    dept = input("Enter Department: ")
+    salary = float(input("Enter Salary: "))
+    email = input("Enter Email: ")
+
+    df = pd.DataFrame([[id, name, dept, salary, email]],
+        columns=["emp_id", "name", "department", "salary", "email"])
+
+    df.to_sql("employee", engine, if_exists="append", index=False)
+    print("Employee Added!")
+
+def display():
+    df = pd.read_sql("SELECT * FROM employee", con)
+    print(df)
+
+def avg():
+    df = pd.read_sql("SELECT salary FROM employee", con)
+    print("Average Salary:", df["salary"].mean())
+
+def update():
+    id = int(input("Enter ID: "))
+    name = input("Enter New Name: ")
+
+    cur.execute("UPDATE employee SET name=%s WHERE emp_id=%s", (name, id))
     con.commit()
+    print("Updated!")
 
+def delete():
+    id = int(input("Enter ID: "))
 
-    def add():
-        try:
-            id = input("Enter ID: ")
-            name = input("Enter Name: ")
-            dept = input("Enter Department: ")
-            salary = input("Enter Salary: ")
-            email = input("Enter Email: ")
+    cur.execute("DELETE FROM employee WHERE emp_id=%s", (id,))
+    con.commit()
+    print("Deleted!")
 
-            cur.execute(
-                "INSERT INTO employee VALUES(%s,%s,%s,%s,%s)",
-                (id, name, dept, salary, email)
-            )
-            con.commit()
-            print("Employee added!")
-
-        except Exception as e:
-            print("Error:", e)
-
-    def display():
-        try:
-            data = pd.read_sql("SELECT * FROM employee", con)
-            print(data)
-
-        except Exception as e:
-            print("Error:", e)
-
-
-    def avg():
-        try:
-            data = pd.read_sql("SELECT salary FROM employee", con)
-
-            if len(data) == 0:
-                print("No employees found")
-            else:
-                print("Average Salary:", data["salary"].mean())
-
-        except Exception as e:
-            print("Error:", e)
-
-    def update():
-        try:
-            id = input("Enter Employee ID: ")
-            name = input("Enter new name: ")
-
-            cur.execute(
-                "UPDATE employee SET name=%s WHERE emp_id=%s",
-                (name, id)
-            )
-            con.commit()
-            print("Employee updated!")
-
-        except Exception as e:
-            print("Error:", e)
-
-    def delete():
-        try:
-            id = input("Enter Employee ID: ")
-
-            cur.execute(
-                "DELETE FROM employee WHERE emp_id=%s",
-                (id,)
-            )
-            con.commit()
-            print("Employee deleted!")
-
-        except Exception as e:
-            print("Error:", e)
-
-
-    while True:
-        print("""
-1. Add Employee
-2. View Employees
+while True:
+    print("""
+1. Add
+2. Display
 3. Average Salary
-4. Update Employee
-5. Delete Employee
+4. Update
+5. Delete
 6. Exit
 """)
 
-        choice = input("Enter choice: ")
+    ch = input("Enter choice: ")
 
-        if choice == "1":
-            add()
+    if ch == "1":
+        add()
+    elif ch == "2":
+        display()
+    elif ch == "3":
+        avg()
+    elif ch == "4":
+        update()
+    elif ch == "5":
+        delete()
+    elif ch == "6":
+        break
+    else:
+        print("Invalid Choice")
 
-        elif choice == "2":
-            display()
-
-        elif choice == "3":
-            avg()
-
-        elif choice == "4":
-            update()
-
-        elif choice == "5":
-            delete()
-
-        elif choice == "6":
-            break
-
-        else:
-            print("Invalid choice")
-
-
-except Exception as e:
-    print("Error:", e)
-
-finally:
-    con.close()
-    print("Database connection closed.")
+con.close()
